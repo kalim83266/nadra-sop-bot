@@ -15,3 +15,6 @@ nadra_rag/
 
 # Agar koi downloaded model hai
 my_model/
+
+data/
+*.pdf

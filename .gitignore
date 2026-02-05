@@ -1,1 +1,17 @@
 .env
+# Secrets (Ye kabhi upload mat karna)
+.env
+
+# Database (Ye local hi rehna chahiye)
+chroma_db/
+chroma_db
+__pycache__/
+
+# Python System Files
+*.pyc
+venv/
+nadra_rag/
+.vscode/
+
+# Agar koi downloaded model hai
+my_model/

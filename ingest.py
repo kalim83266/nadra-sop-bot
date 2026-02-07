@@ -1,47 +1,59 @@
 import os
 import chromadb
+from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.embeddings.gemini import GeminiEmbedding  # <-- Hum Google use karenge
-from dotenv import load_dotenv
+from llama_index.embeddings.gemini import GeminiEmbedding
 
-# 1. Environment Load
+# 1. Load Environment Variables
 load_dotenv()
 
-# Google API Key check
-if not os.getenv("GOOGLE_API_KEY"):
-    raise ValueError("❌ Google API Key nahi mili! .env file check karein.")
+def ingest_data():
+    """
+    Reads PDF documents from the 'data' directory, generates embeddings,
+    and stores them in a local ChromaDB vector database.
+    """
+    
+    # Check for API Key
+    if not os.getenv("GOOGLE_API_KEY"):
+        raise ValueError("❌ Error: GOOGLE_API_KEY not found in .env file.")
 
-# 2. Setup Embedding Model (GOOGLE ONLINE) 🌐
-# Hum HuggingFace ke bajaye Google ka 'text-embedding-004' use kar rahe hain.
-# Yeh online chalega aur bohot fast hai.
-print("⚙️ Connecting to Google Embeddings (Online)...")
-embed_model = GeminiEmbedding(model_name="models/text-embedding-004")
+    print("⚙️  Initializing Embedding Model (Google text-embedding-004)...")
+    
+    # Configure the embedding model (Google's optimized model for retrieval)
+    embed_model = GeminiEmbedding(model_name="models/text-embedding-004")
+    Settings.embed_model = embed_model
+    Settings.llm = None  # LLM is not required for ingestion (saves cost)
 
-Settings.embed_model = embed_model
-Settings.llm = None
+    # 2. Load Documents
+    print("📂 Loading documents from 'data' directory...")
+    try:
+        documents = SimpleDirectoryReader("data").load_data()
+        print(f"📄 Successfully loaded {len(documents)} document pages.")
+    except Exception as e:
+        print(f"❌ Error loading documents: {e}")
+        return
 
-# 3. Read PDFs
-print("📂 PDFs read kiye ja rahe hain...")
-try:
-    documents = SimpleDirectoryReader("data").load_data()
-    print(f"📄 Total {len(documents)} pages read kiye gaye.")
-except Exception as e:
-    print(f"❌ Error reading PDFs: {e}")
-    exit()
+    # 3. Connect to Local Vector Database (ChromaDB)
+    print("💾 Connecting to local ChromaDB...")
+    db = chromadb.PersistentClient(path="./chroma_db")
+    
+    # Create or retrieve the collection
+    chroma_collection = db.get_or_create_collection("nadra_sop")
+    
+    # Set up the Vector Store
+    vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-# 4. Create Local Database (ChromaDB)
-print("💾 Local Database (ChromaDB) bana rahe hain...")
-db = chromadb.PersistentClient(path="./chroma_db")
-chroma_collection = db.get_or_create_collection("nadra_sop")
+    # 4. Generate Embeddings and Save to Index
+    print("🚀 Generating embeddings and indexing data (this may take a moment)...")
+    VectorStoreIndex.from_documents(
+        documents, 
+        storage_context=storage_context, 
+        show_progress=True
+    )
 
-vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
-storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    print("✅ SUCCESS: Knowledge base updated successfully in 'chroma_db'.")
 
-# 5. Save Data (Ingest)
-print("🚀 Data Google se process hokar save ho raha hai...")
-index = VectorStoreIndex.from_documents(
-    documents, storage_context=storage_context, show_progress=True
-)
-
-print("✅ SUCCESS! Data save ho gaya hai.")
+if __name__ == "__main__":
+    ingest_data()

@@ -1,174 +1,180 @@
-# 🇵🇰 NADRA SOP AI Assistant
-### Retrieval-Augmented Generation (RAG) Chatbot for NADRA SOPs
+# 🇵🇰 NADRA SOP Assistant
 
-> **An AI-powered assistant that delivers accurate, source-grounded answers from NADRA Standard Operating Procedures (SOPs) using a modern Retrieval-Augmented Generation (RAG) pipeline.**
+**AI‑Powered Retrieval‑Augmented Generation (RAG) Chatbot for Official SOPs**
 
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-![LlamaIndex](https://img.shields.io/badge/Framework-LlamaIndex-purple)
-![Gemini](https://img.shields.io/badge/LLM-Google%20Gemini-orange)
-![Pinecone](https://img.shields.io/badge/Vector%20DB-Pinecone-green)
-![Streamlit](https://img.shields.io/badge/UI-Streamlit-red)
+&#x20; &#x20;
 
 ---
 
 ## 📌 Overview
 
-NADRA’s Standard Operating Procedures (SOPs) are extensive and complex, making it difficult to quickly locate accurate information regarding:
+**NADRA SOP Assistant** is a production‑grade AI chatbot built to deliver **accurate, verifiable answers** strictly from official NADRA documents (SOPs, CNIC fee schedules, and registration policies).
 
-- CNIC issuance & renewal  
-- Family Registration Certificate (FRC)  
-- Fees, timelines, and eligibility rules  
+The system uses **Retrieval‑Augmented Generation (RAG)** to ground every response in source PDFs—minimizing hallucinations and ensuring policy‑level accuracy. It supports **English, Urdu, and Roman Urdu** queries.
 
-**NADRA SOP AI Assistant** allows users to ask questions in **natural language (English or Roman Urdu)**.  
-The system retrieves the **exact relevant SOP sections** and generates **fact-based answers** using Google Gemini, ensuring **high accuracy and minimal hallucination**.
+> ⚠️ This repository demonstrates an **AI reference assistant**. It is **not an official NADRA product**.
 
 ---
 
-## 🎯 Key Objectives
+## ✨ Key Capabilities
 
-- Provide instant answers grounded in official SOP documents  
-- Eliminate manual searching through PDFs  
-- Support bilingual queries (English & Roman Urdu)  
-- Ensure accuracy through Retrieval-Augmented Generation (RAG)  
+- **🧠 Fast, Reliable Reasoning:** Powered by **Google Gemini 2.5 Flash** for low‑latency responses.
+- **📂 Secure Local Vector Store:** **ChromaDB** with persistent local storage (no external vector DB required).
+- **🔎 Grounded Answers (RAG):** Responses are generated **only** from indexed PDFs.
+- **💬 Context‑Aware Chat:** Maintains conversational history for accurate follow‑ups.
+- **🌐 Multilingual:** English, Urdu, and Roman Urdu input/output.
+- **🎨 Clean UI:** Streamlit‑based interface with chat bubbles and sidebar controls (ideal for demos/admin use).
 
 ---
 
-## 🧠 System Architecture (RAG Pipeline)
+## 🧱 Architecture (High‑Level)
 
-```mermaid
-graph TD
-    A[📂 NADRA SOP PDFs] -->|Load & Chunk| B[📄 Text Chunks]
-    B -->|Generate Embeddings| C[📐 Vector Representations]
-    C -->|Upsert| D[(🌲 Pinecone Vector DB)]
-
-    U[👤 User Query] -->|Embed Query| E[📐 Query Vector]
-    E -->|Similarity Search| D
-    D -->|Top-K Retrieval| F[📝 Relevant Context]
-
-    F -->|Context + Question| G[🧠 Google Gemini 1.5 Flash]
-    G -->|Answer Generation| H[💬 Final Response]
+```
+User (Web / Mobile)
+        │
+        ▼
+  Streamlit UI (Demo/Admin)
+        │
+        ▼
+   RAG Pipeline (LlamaIndex)
+        │
+        ▼
+ Gemini 2.5 Flash  +  ChromaDB (Local)
 ```
 
----
-
-## ✨ Features
-
-- RAG-based Question Answering  
-- Fast semantic search using Pinecone  
-- Google Gemini 1.5 Flash for intelligent responses  
-- Automated PDF ingestion pipeline  
-- Interactive Streamlit UI  
-- Cloud-ready & scalable architecture  
+> **Note:** For production web/mobile apps, the RAG logic can be exposed via **FastAPI** and consumed by React/Flutter clients.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
-| Component | Technology | Description |
-|---------|-----------|-------------|
-| Programming Language | Python 3.10 | Core development |
-| Framework | LlamaIndex | RAG orchestration |
-| LLM | Google Gemini 1.5 Flash | Answer generation |
-| Vector Database | Pinecone | Semantic search |
-| Embeddings | HuggingFace (all-mpnet-base-v2) | 768-dim embeddings |
-| Frontend | Streamlit | User interface |
+| Layer                     | Technology                   |
+| ------------------------- | ---------------------------- |
+| **Language**              | Python 3.10+                 |
+| **LLM**                   | Google Gemini 2.5 Flash      |
+| **Embeddings**            | Google `text-embedding-004`  |
+| **RAG Framework**         | LlamaIndex                   |
+| **Vector Database**       | ChromaDB (Local, Persistent) |
+| **Frontend (Demo/Admin)** | Streamlit                    |
 
 ---
 
-## 🚀 Getting Started (Local Setup)
+## ⚙️ Installation & Setup
 
 ### 1️⃣ Clone the Repository
+
 ```bash
-git clone https://github.com/kalim83266/nadra-sop-bot.git
+git clone https://github.com/YOUR_USERNAME/nadra-sop-bot.git
 cd nadra-sop-bot
 ```
 
-### 2️⃣ Create Conda Environment
+### 2️⃣ Create a Virtual Environment
+
 ```bash
-conda create -n nadra_rag python=3.10 -y
-conda activate nadra_rag
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 ### 3️⃣ Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 4️⃣ Configure Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the project root:
 
-```ini
-GOOGLE_API_KEY="your_google_api_key"
-PINECONE_API_KEY="your_pinecone_api_key"
-HF_TOKEN="your_huggingface_token"
+```env
+GOOGLE_API_KEY=your_google_api_key_here
 ```
 
-> ⚠️ Never commit `.env` to GitHub
+> 🔒 **Security:** Never commit `.env` files or API keys to version control.
 
 ---
 
-### 5️⃣ Ingest SOP Documents
+## ▶️ Usage Guide
 
-Place NADRA SOP PDF files inside the `data/` folder and run:
+### Step 1: Add Source Documents
+
+Place official SOP and policy PDFs into the `data/` directory.
+
+### Step 2: Build the Vector Database
+
+Run the ingestion pipeline to parse PDFs and generate embeddings:
 
 ```bash
 python ingest.py
 ```
 
-This step:
-- Reads PDFs  
-- Splits text into chunks  
-- Generates embeddings  
-- Uploads vectors to Pinecone  
+Wait for the **"✅ SUCCESS"** confirmation.
 
-> Run once unless documents change.
+### Step 3: Launch the Application
 
----
-
-### 6️⃣ Launch the Application
 ```bash
 streamlit run app.py
 ```
 
+Open the provided local URL in your browser to start chatting.
+
 ---
 
-## 📂 Project Structure
+## 📁 Project Structure
 
-```plaintext
+```
 nadra-sop-bot/
 │
-├── .env                  # API keys (private)
-├── .gitignore            # Prevents secret leakage
-├── requirements.txt      # Dependencies
-├── ingest.py             # PDF ingestion & vectorization
-├── app.py                # Streamlit chatbot
-└── data/                 # NADRA SOP PDF files
+├── chroma_db/             # Auto-generated local vector database
+├── data/                  # Source PDF documents
+├── .env                   # Environment variables (ignored by git)
+├── .gitignore             # Git ignore rules
+├── app.py                 # Streamlit chatbot UI
+├── ingest.py              # PDF ingestion & indexing script
+├── requirements.txt       # Python dependencies
+└── README.md              # Project documentation
 ```
+
+---
+
+## 📸 Screenshots
+
+*Add UI screenshots here to showcase the chat experience.*
+
+---
+
+## 🚀 Production Notes
+
+- Streamlit is recommended for **demos, internal tools, and admin panels**.
+- For public deployment (Web/Android/iOS), expose the RAG logic via **FastAPI** and build a dedicated frontend (React / Flutter).
+- Implement **authentication, rate limiting, and HTTPS** for enterprise or government‑grade deployments.
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repository  
-2. Create a feature branch  
-3. Commit your changes  
-4. Push to your branch  
-5. Open a Pull Request  
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a Pull Request with clear details
 
 ---
 
-## 📬 Contact
+## 📄 License & Disclaimer
 
-**Developer:** Kalim  
-**GitHub:** https://github.com/kalim83266
+This project is intended for **educational and reference purposes only**. It is not affiliated with or endorsed by NADRA. All documents remain the property of their respective owners.
 
 ---
 
-## ⭐ Acknowledgements
+## 👤 Author
 
-- NADRA SOP Documentation  
-- Google Gemini  
-- LlamaIndex  
-- Pinecone  
-- HuggingFace  
+**Kaleem Ullah**\
+*AI & RAG Systems Developer*
+
+> Built as a portfolio‑grade project demonstrating secure, multilingual, document‑grounded AI systems.
+
